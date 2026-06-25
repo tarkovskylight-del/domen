@@ -54,7 +54,8 @@ def get_default_config():
         'WINDOW_WIDTH': 1920,
         'WINDOW_HEIGHT': 1080,
         'DEFAULT_PASSWORD': 'JagoanDomain2024!',
-        'PROMO_CODE': 'FREEWEBID100',
+        'PROMO_CODE': 'FREEMYID100',
+        'DOMAIN_EXTENSION': 'my.id',
         'RESULTS_FILE': 'results.txt',
         'LOG_FILE': 'domain_claimer.log',
         'AFTER_CLICK_DELAY': 2,
@@ -103,7 +104,8 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 BASE_URL = "https://beli.jagoanhosting.com/domain-murah"
-PROMO_CODE = CONFIG.get('PROMO_CODE', 'FREEWEBID100')
+PROMO_CODE = CONFIG.get('PROMO_CODE', 'FREEMYID100')
+DOMAIN_EXTENSION = CONFIG.get('DOMAIN_EXTENSION', 'my.id').strip().lstrip('.')
 RESULTS_FILE = CONFIG.get('RESULTS_FILE', 'results.txt')
 FIXED_PASSWORD = CONFIG.get('DEFAULT_PASSWORD', 'JagoanDomain2024!')
 
@@ -127,26 +129,81 @@ def send_telegram(message: str):
     except Exception as e:
         logger.warning(f"Telegram error: {e}")
 
-# Cool domain name wordlists (expanded for more unique combinations)
-COOL_WORDS_1 = [
-    "cyber", "tech", "smart", "swift", "peak", "nova", "nexus", "prime",
-    "quantum", "pixel", "sonic", "flash", "bolt", "storm", "wave", "spark",
-    "echo", "fusion", "zenith", "vertex", "apex", "core", "edge", "infinity",
-    "lunar", "solar", "cosmic", "digital", "neural", "crypto", "meta", "hyper",
-    "aether", "aurora", "blaze", "cipher", "delta", "electro", "flux", "gamma",
-    "helix", "ion", "kinetic", "lumina", "matrix", "neon", "omega", "phoenix",
-    "quasar", "radiant", "sigma", "titan", "ultra", "vortex", "xenon", "zephyr",
-    "astro", "byte", "circuit", "dyna", "ether", "fiber", "giga", "helios",
-    "stellar", "nexgen", "prism", "rogue", "synth", "turbo", "vita", "warp"
+# Domain wordlists — pakai kata2 yang jarang / unik / niche
+# Hindari kata generik yang udah pasti diclaim (toko, jaya, cyber, hub, dll)
+
+WORDS_A = [
+    # English — unik, jarang dijadiin domain
+    "obsidian", "cobalt", "indigo", "quartz", "onyx", "amber", "zircon",
+    "cerium", "helium", "argon", "krypton", "xenon", "neon", "radon",
+    "photon", "proton", "neutron", "meson", "boson", "quark", "lepton",
+    "tachyon", "chronon", "magnon", "phonon", "exciton", "polaron",
+    "vortex", "helix", "fractal", "entropy", "synapse", "cortex",
+    "axon", "dendrite", "myelin", "neuron", "ganglion", "plexus",
+    "stratum", "laminar", "turbine", "cyclone", "typhoon", "zephyr",
+    "nimbus", "cirrus", "cumulus", "stratus", "aurora", "solstice",
+    "equinox", "perihelion", "aphelion", "zenith", "nadir", "azimuth",
+    "parallax", "refraction", "diffraction", "dispersion", "prism",
+    "lattice", "matrix", "tensor", "vector", "scalar", "gradient",
+    "diverge", "converge", "tangent", "secant", "cosine", "radiant",
+    "lumen", "candela", "kelvin", "pascal", "joule", "farad", "ohmic",
+    "gauss", "tesla", "weber", "henry", "siemen", "coulomb", "ampere",
+    "wyvern", "gryphon", "chimera", "basilisk", "kraken", "leviathan",
+    "behemoth", "juggernaut", "colossus", "monolith", "obelisk", "spire",
+    "citadel", "rampart", "bastion", "bulwark", "parapet", "crenate",
+    "labyrinth", "catacombs", "sanctum", "vestibule", "portico", "atrium",
+    # Indonesian — bukan yg generik
+    "kencana", "kumala", "wahana", "wahyu", "waskita", "widya", "windu",
+    "wiraga", "wisesa", "wisnu", "yudha", "yuga", "yudhis", "adikara",
+    "adiguna", "adiluhung", "adhikarya", "adiwira", "adikarsa", "adidaya",
+    "bhaskara", "bimantara", "brawijaya", "cendekia", "candrakanta",
+    "darpala", "darwis", "dayatama", "digdaya", "dirgantara", "dwikarsa",
+    "erlangga", "eskalasi", "etalase", "etanola", "ewangga", "fadillah",
+    "galaksi", "galatama", "galgala", "ganesha", "ganendra", "ganestha",
+    "hastaguna", "hastabrata", "hayunara", "helanca", "hermina", "hidayat",
+    "ikalino", "ikamaya", "ikasatria", "imajinasi", "imbangan", "inovata",
+    "jalabumi", "jalakarsa", "jalapratama", "jalasena", "jalatama",
+    "kahuripan", "kalimaya", "kalingga", "karisma", "karuhun", "kasatmata",
+    "kendali", "kencono", "kenthongan", "kepodang", "kerabat", "keraton",
+    "laksamana", "langkawi", "laraska", "latansa", "lavesta", "lembayung",
+    "madhura", "mahardika", "mahkota", "maharani", "mahasurya", "mahavira",
+    "nararya", "narayana", "narendra", "narmada", "narpati", "nasiruna",
+    "pahala", "palagan", "palguna", "palimanan", "panakawan", "pandhita",
+    "rajendra", "raksasa", "ramanda", "rangkuti", "ranjana", "rantepao",
+    "sabdatama", "sabrang", "sahasika", "samodra", "sampurna", "sancaya",
+    "tagarela", "tajakusuma", "talenta", "talisma", "tamansari", "tandika",
+    "udayana", "ugrasena", "ujwalata", "upadesa", "upakara", "upasara",
+    "vaibhava", "vajrayana", "vanabara", "vandana", "varuna", "vasudeva",
+    "wahyuning", "walidata", "wanabakti", "wandira", "wangsapati", "wardaya",
+    "yatmaka", "yayasan", "yogabrata", "yogakarta", "yogananda", "yuddhistira",
+    "zaituna", "zamzami", "zaneta", "zarindra", "zastrouw", "zulkarnain"
 ]
 
-COOL_WORDS_2 = [
-    "hub", "lab", "zone", "net", "web", "tech", "code", "dev", "pro", "sys",
-    "link", "node", "core", "base", "cloud", "space", "verse", "grid", "nest",
-    "port", "realm", "forge", "studio", "works", "box", "byte", "bit", "pulse",
-    "flow", "wave", "shift", "spark", "dash", "loop", "sync", "beam", "gate",
-    "edge", "flux", "glow", "hive", "axis", "echo", "peak", "vault", "apex",
-    "dock", "mesh", "stack", "scope", "byte", "flux", "matrix", "engine", "cluster"
+WORDS_B = [
+    # English suffix — jarang dipakai
+    "rift", "vale", "glen", "cove", "fjord", "atoll", "lagoon", "geyser",
+    "tundra", "steppe", "savanna", "taiga", "canyon", "ravine", "gorge",
+    "escarp", "plateau", "caldera", "isthmus", "peninsula", "archipelago",
+    "soleil", "lumiere", "ombre", "eclat", "mirage", "oasis", "zenith",
+    "noctis", "lunaris", "solaris", "astralis", "celestis", "ethereal",
+    "cryptis", "nexalis", "fluxion", "syntaxis", "paradox", "catalyst",
+    "alembic", "crucible", "retort", "amalgam", "alloy", "carbide",
+    "silicate", "titanate", "ferrite", "garnite", "pyrite", "calcite",
+    "basalt", "granite", "diorite", "gabbro", "pumice", "obsidite",
+    "codex", "grimoire", "lexicon", "compendium", "annals", "chronicle",
+    "palimpsest", "folio", "quire", "fascicle", "canto", "strophe",
+    "theorem", "axiom", "lemma", "corollary", "postulate", "conjecture",
+    "mantra", "sutra", "tantra", "dharma", "karma", "nirvana", "moksha",
+    "prana", "chakra", "mudra", "yantra", "bardo", "dharani", "samadhi",
+    # Indonesian suffix — spesifik bukan generik
+    "wangi", "asri", "elok", "indah", "permai", "cantik", "molek",
+    "agung", "mulia", "luhur", "tinggi", "megah", "gagah", "perkasa",
+    "paripurna", "sempurna", "purna", "saksama", "teliti", "cermat",
+    "wicaksana", "bijaksana", "arif", "pandai", "cendekia", "pintar",
+    "wirausaha", "wirawan", "pejuang", "penegak", "pembela", "pengayom",
+    "cahyaning", "suharto", "soeharto", "suwardi", "sukarno", "suryadi",
+    "nirmala", "nirmana", "nirwana", "nirwasita", "nirsabda", "nirlaba",
+    "pratama", "perdana", "pertama", "utama", "wahana", "wiyata", "widyata"
 ]
 
 EMAIL_DOMAINS = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"]
@@ -159,18 +216,22 @@ class DomainClaimer:
         self.success_count = 0
         
     def generate_cool_domain(self) -> str:
-        """Generate a cool random domain name (2 words, no numbers, no duplicates)"""
-        # Always use 2-word combination for cleaner, shorter domains
-        # Ensure word1 and word2 are different
-        word1 = random.choice(COOL_WORDS_1)
-        word2 = random.choice(COOL_WORDS_2)
-        
-        # Make sure word2 is different from word1 (avoid duplicates like "fluxflux")
-        while word1.lower() == word2.lower():
-            word2 = random.choice(COOL_WORDS_2)
-        
-        return f"{word1}{word2}"
-    
+        """Generate highly unique domain — rare words + optional number suffix"""
+        w1 = random.choice(WORDS_A)
+        w2 = random.choice(WORDS_B)
+        while w1.lower() == w2.lower():
+            w2 = random.choice(WORDS_B)
+
+        base = f"{w1}{w2}"
+
+        # 40% chance: tambah 1-2 digit di akhir domain biar makin unik
+        if random.random() < 0.4:
+            digits = random.randint(1, 2)
+            num = random.randint(10 ** (digits - 1) if digits > 1 else 1, 10 ** digits - 1)
+            base = f"{base}{num}"
+
+        return base
+
     def generate_random_name(self) -> str:
         """Generate simple random name"""
         first_names = ["Agus", "Budi", "Citra", "Dewi", "Eko", "Fitri", "Guntur", 
@@ -179,12 +240,13 @@ class DomainClaimer:
                       "Saputra", "Wati", "Kurniawan", "Sari"]
         return f"{random.choice(first_names)} {random.choice(last_names)}"
     
-    def generate_random_email(self) -> str:
-        """Generate random email address"""
-        username = ''.join(random.choices(string.ascii_lowercase, k=8))
-        number = random.randint(100, 9999)
-        domain = random.choice(EMAIL_DOMAINS)
-        return f"{username}{number}@{domain}"
+    def generate_random_email(self, domain_name: str = '') -> str:
+        """Generate email based on domain name + random numbers (natural-looking)"""
+        base = domain_name.lower() if domain_name else ''.join(random.choices(string.ascii_lowercase, k=6))
+        num_digits = random.randint(1, 3)
+        number = random.randint(10 ** (num_digits - 1) if num_digits > 1 else 1, 10 ** num_digits - 1)
+        mail_domain = random.choice(EMAIL_DOMAINS)
+        return f"{base}{number}@{mail_domain}"
     
     def generate_phone_number(self) -> str:
         """Generate random Indonesian phone number (without +62)"""
@@ -196,7 +258,7 @@ class DomainClaimer:
     
     async def claim_domain(self, domain_name: str) -> dict:
         """Main function to claim a single domain"""
-        logger.info(f"[Thread-{self.thread_id}] Starting claim for: {domain_name}.web.id")
+        logger.info(f"[Thread-{self.thread_id}] Starting claim for: {domain_name}.{DOMAIN_EXTENSION}")
         
         # Create screenshot folder if needed
         if CONFIG.get('SCREENSHOT_ON_ERROR'):
@@ -227,7 +289,7 @@ class DomainClaimer:
             
             try:
                 # Step 1: Navigate to domain search page
-                url = f"{BASE_URL}?domain={domain_name}.web.id"
+                url = f"{BASE_URL}?domain={domain_name}.{DOMAIN_EXTENSION}"
                 logger.info(f"[Thread-{self.thread_id}] Navigating to: {url}")
                 await page.goto(url, wait_until='networkidle', timeout=CONFIG.get('PAGE_TIMEOUT', 30) * 1000)
                 await asyncio.sleep(CONFIG.get('AFTER_CLICK_DELAY', 2))
@@ -244,7 +306,7 @@ class DomainClaimer:
                     await cart_button.wait_for(state='visible', timeout=CONFIG.get('ELEMENT_TIMEOUT', 10) * 1000)
                     
                     # Domain is available!
-                    logger.info(f"[Thread-{self.thread_id}] Domain {domain_name}.web.id is available!")
+                    logger.info(f"[Thread-{self.thread_id}] Domain {domain_name}.{DOMAIN_EXTENSION} is available!")
                     await cart_button.click()
                     logger.info(f"[Thread-{self.thread_id}] Clicked 'Tambah ke keranjang'")
                     await asyncio.sleep(CONFIG.get('AFTER_CLICK_DELAY', 2))
@@ -255,7 +317,7 @@ class DomainClaimer:
                     try:
                         domain_unavailable_text = page.locator('text=Domain tidak tersedia').first
                         if await domain_unavailable_text.is_visible(timeout=2000):
-                            logger.warning(f"[Thread-{self.thread_id}] Domain {domain_name}.web.id is not available")
+                            logger.warning(f"[Thread-{self.thread_id}] Domain {domain_name}.{DOMAIN_EXTENSION} is not available")
                             return {"success": False, "error": "Domain not available"}
                     except:
                         pass
@@ -290,7 +352,7 @@ class DomainClaimer:
                 
                 # Step 6: Fill registration form
                 logger.info(f"[Thread-{self.thread_id}] Filling registration form...")
-                email = self.generate_random_email()
+                email = self.generate_random_email(domain_name)
                 phone = self.generate_phone_number()
                 name = self.generate_random_name()
                 
@@ -307,11 +369,12 @@ class DomainClaimer:
                 register_button = page.locator('button.col-span-full:has-text("Register")').first
                 await register_button.click()
                 logger.info(f"[Thread-{self.thread_id}] Clicked 'Register' button")
-                await asyncio.sleep(CONFIG.get('AFTER_CLICK_DELAY', 2) + 2)
+                await asyncio.sleep(CONFIG.get('AFTER_CLICK_DELAY', 2) + 6)
                 
                 # Step 7: Wait for account info and click "Bayar Sekarang"
                 logger.info(f"[Thread-{self.thread_id}] Waiting for account confirmation...")
                 await page.wait_for_selector('text=Informasi Akun Pemesan', timeout=CONFIG.get('ELEMENT_TIMEOUT', 10) * 1000 + 5000)
+                await asyncio.sleep(3) # Extra delay to ensure registration and session settle down
                 
                 bayar_button = page.locator('button:has-text("Bayar Sekarang")').last
                 await bayar_button.click()
@@ -341,7 +404,7 @@ class DomainClaimer:
                     result = {
                         "success": True,
                         "email": email,
-                        "domain": f"{domain_name}.web.id",
+                        "domain": f"{domain_name}.{DOMAIN_EXTENSION}",
                         "password": self.password,
                         "name": name,
                         "phone": phone
@@ -383,15 +446,7 @@ class DomainClaimer:
             logger.info(f"[Thread-{self.thread_id}] [SAVED] {line}")
 
             # Telegram notification
-            msg = (
-                f"\u2705 <b>Domain Berhasil Di-claim!</b>\n"
-                f"\ud83d\udce7 Email  : <code>{result['email']}</code>\n"
-                f"\ud83c\udf10 Domain : <code>{result['domain']}</code>\n"
-                f"\ud83d\udd11 Pass   : <code>{result['password']}</code>\n"
-                f"\ud83d\udcdd Name   : {result['name']}\n"
-                f"\ud83d\udcf1 Phone  : {result['phone']}\n"
-                f"\ud83d\udd52 Time   : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-            )
+            msg = f"<code>{result['email']}:{result['domain']}</code>"
             send_telegram(msg)
     
     async def run(self):
